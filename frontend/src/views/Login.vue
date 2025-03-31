@@ -36,14 +36,12 @@ const login = async () => {
 }
 </script>
 
-
-
 <template>
     <div class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
         <div class="w-full max-w-md">
 
             <div class="bg-white p-8 rounded-2xl shadow-xl">
-                <h1 class="text-3xl font-bold text-center mb-6">Iniciar Sesión</h1>
+                <h1 class="text-3xl font-bold text-center mb-6 text-gray-700">Iniciar Sesión</h1>
                 <form @submit.prevent="login" class="space-y-4">
                     <input v-model="email" type="email" placeholder="Correo electrónico"
                         class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
