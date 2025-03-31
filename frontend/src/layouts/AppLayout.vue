@@ -69,14 +69,15 @@
         <slot />
       </main>
 
-      <footer class="bg-gradient-to-r from-blue-600 to-blue-800 text-white text-center p-4 shadow-inner">
-        <p class="opacity-80">© 2025 Sistema de Gestión de Vehículos 🚓</p>
+      <footer class="bg-gradient-to-r from-blue-600 to-blue-800 text-white text-center p-4 ">
+        <p>© 2025 Sistema de Gestión de Vehículos </p>
       </footer>
     </div>
   </div>
 </template>
 
 <script>
+
 import { Home, Car, Users, ClipboardList, Menu, User, ChevronDown, ChevronUp } from 'lucide-vue-next'
 
 export default {
