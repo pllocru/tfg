@@ -8,10 +8,12 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    // En tu controlador de usuarios (por ejemplo, UserController.php)
     public function index()
     {
-        return response()->json(User::all());
+        return User::select('id', 'name', 'email', 'role')->get();
     }
+
 
     public function store(Request $request)
     {

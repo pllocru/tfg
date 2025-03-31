@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import api from '@/services/api'
 import AppLayout from '@/layouts/AppLayout.vue'
+import { VueGoodTable } from 'vue-good-table-next'
+import 'vue-good-table-next/dist/vue-good-table-next.css'
 
 const toast = useToast()
 
@@ -10,6 +12,9 @@ const usuarios = ref([])
 const loading = ref(true)
 const mostrarModal = ref(false)
 const procesando = ref(false)
+
+const seleccionados = ref([])
+
 
 // Inicializa role como una cadena vacía
 const nuevoUsuario = ref({ name: '', email: '', password: '', role: '' })
@@ -24,16 +29,8 @@ const errores = ref({
 const abrirModal = () => (mostrarModal.value = true)
 const cerrarModal = () => {
   mostrarModal.value = false
-
-  errores.value = {
-    name: '',
-    email: '',
-    password: '',
-    role: '',
-  }
-
+  errores.value = { name: '', email: '', password: '', role: '' }
   nuevoUsuario.value = { name: '', email: '', password: '', role: '' }
-
 }
 
 const cargarUsuarios = async () => {
@@ -42,7 +39,7 @@ const cargarUsuarios = async () => {
     const res = await api.get('/usuarios')
     usuarios.value = res.data
   } catch (error) {
-    toast.error('Error al cargar usuarios ')
+    toast.error('Error al cargar usuarios')
     console.error('Error al cargar usuarios:', error)
   } finally {
     loading.value = false
@@ -57,12 +54,12 @@ const añadirUsuario = async () => {
       return
     }
     await api.post('/usuarios', nuevoUsuario.value)
-    toast.success('Usuario creado correctamente ')
+    toast.success('Usuario creado correctamente')
     cerrarModal()
     nuevoUsuario.value = { name: '', email: '', password: '', role: '' }
     cargarUsuarios()
   } catch (error) {
-    toast.error('Error al crear usuario ')
+    toast.error('Error al crear usuario')
     console.error(error)
   } finally {
     procesando.value = false
@@ -111,48 +108,142 @@ function validarFormilariorio() {
 }
 
 onMounted(cargarUsuarios)
+
+// Se añade una columna para acciones
+const columns = [
+  {
+    label: 'Nombre',
+    field: 'name',
+    sortable: true,
+    filterOptions: {
+      enabled: true,
+      placeholder: 'Filtrar por nombre...',
+      styleClass: 'text-sm',
+    },
+  },
+  {
+    label: 'Email',
+    field: 'email',
+    sortable: true,
+    filterOptions: {
+      enabled: true,
+      placeholder: 'Filtrar por email...',
+    },
+  },
+  {
+    label: 'Rol',
+    field: 'role',
+    sortable: true,
+    filterOptions: {
+      enabled: true,
+      filterDropdownItems: ['Operario', 'Administrador'], // dropdown en lugar de input
+      placeholder: 'Seleccionar rol',
+    },
+  },
+  {
+    label: 'Acciones',
+    field: 'acciones',
+  },
+]
+
+
+const paginationOptions = {
+  enabled: true,
+  perPage: 10,
+  mode: 'pages', // Muestra números de página
+  nextLabel: 'Siguiente',
+  prevLabel: 'Anterior',
+  rowsPerPageLabel: 'Filas por página',
+  ofLabel: 'de',
+}
+const searchOptions = {
+  enabled: true,
+  placeholder: 'Buscar usuario...',
+}
+
+// Función para editar un usuario
+const editarUsuario = (usuario) => {
+  console.log('Editar usuario:', usuario)
+  toast.info(`Editar usuario: ${usuario.name}`)
+  // Implementa aquí la lógica de edición, por ejemplo, abriendo otro modal con el formulario de edición.
+}
+
+// Función para borrar un usuario
+const borrarUsuario = (usuario) => {
+  if (confirm(`¿Está seguro de eliminar a ${usuario.name}?`)) {
+    api.delete(`/usuarios/${usuario.id}`)
+      .then(() => {
+        toast.success('Usuario eliminado correctamente')
+        cargarUsuarios()
+      })
+      .catch(error => {
+        toast.error('Error al eliminar usuario')
+        console.error(error)
+      })
+  }
+}
+
+const mostrarDetalles = (usuario) => {
+  console.log('👀 Usuario:', usuario)
+  toast.info(`${usuario.name} (${usuario.email})`)
+}
+
 </script>
 
 <template>
   <AppLayout>
     <div class="overflow-x-auto min-h-[300px]">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-semibold text-center">👥 Lista de Usuarios</h2>
+        <h2 class="text-2xl font-semibold text-center">Lista de Usuarios</h2>
         <button @click="abrirModal"
-          class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow transition flex items-center gap-2">
-          ➕ Añadir
+          class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow transition flex items-center float-left">
+          Añadir
         </button>
+        <button @click="eliminarSeleccionados" :disabled="seleccionados.length === 0"
+          class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded shadow text-sm">
+          🗑️ Eliminar seleccionados
+        </button>
+
       </div>
 
       <div v-if="loading" class="text-center text-gray-500 py-10 animate-pulse">
         Cargando usuarios...
       </div>
 
-      <table v-else class="min-w-full bg-white shadow rounded-lg overflow-hidden">
-        <thead class="bg-blue-600 text-white">
-          <tr>
-            <th class="text-left px-6 py-3">Nombre</th>
-            <th class="text-left px-6 py-3">Email</th>
-            <th class="text-left px-6 py-3">Rol</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-blue-100 text-blue-900">
-          <tr v-for="usuario in usuarios" :key="usuario.id" class="hover:bg-blue-50 transition">
-            <td class="px-6 py-4">{{ usuario.name }}</td>
-            <td class="px-6 py-4">{{ usuario.email }}</td>
-            <td class="px-6 py-4">{{ usuario.role }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div v-else>
+        <vue-good-table :columns="columns" :rows="usuarios" :search-options="searchOptions"
+          :pagination-options="paginationOptions" styleClass="vgt-table condensed">
+          <!-- Slot para personalizar cada fila -->
+          <template #table-row="props">
+            <td v-if="props.column.field === 'acciones'" class="px-4 py-2">
+              <div class="flex gap-2">
+                <button @click.stop="mostrarDetalles(props.row)"
+                  class="bg-gray-500 hover:bg-gray-600 text-white px-2 py-1 rounded">
+                  Ver
+                </button>
+                <button @click.stop="editarUsuario(props.row)"
+                  class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">
+                  Editar
+                </button>
+                <button @click.stop="borrarUsuario(props.row)"
+                  class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">
+                  Borrar
+                </button>
+              </div>
+            </td>
 
-      <!-- Modal -->
+          </template>
+
+        </vue-good-table>
+      </div>
+
+      <!-- Modal de creación de usuario -->
       <transition name="fade">
         <div v-if="mostrarModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div class="bg-white rounded-lg shadow-lg w-full max-w-lg">
             <div class="px-6 py-4 border-b">
               <h2 class="text-xl font-bold text-gray-800">Nuevo Usuario</h2>
             </div>
-
             <!-- Formulario -->
             <form @submit.prevent="añadirUsuario" class="px-6 py-4">
               <input v-model="nuevoUsuario.name" class="w-full p-2 border rounded mb-3 bg-white" placeholder="Nombre" />
@@ -187,3 +278,21 @@ onMounted(cargarUsuarios)
     </div>
   </AppLayout>
 </template>
+
+<style scoped>
+:deep(table.vgt-table td) {
+  border-bottom: none !important;
+}
+
+:deep(.vgt-input) {
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+}
+
+:deep(.vgt-table tbody tr:hover) {
+  background-color: #e0f2fe;
+  /* azul clarito */
+  cursor: pointer;
+}
+</style>

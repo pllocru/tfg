@@ -45,7 +45,7 @@
       <header class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4 shadow-md">
         <div class="container mx-auto flex justify-between items-center">
           <h1 class="text-2xl font-bold flex items-center gap-3">
-            <span class="text-3xl">🚗</span> Gestión de Vehículos
+            <span class="text-3xl"></span> Gestión de Vehículos
           </h1>
 
           <div class="relative" @click="toggleProfileMenu">
