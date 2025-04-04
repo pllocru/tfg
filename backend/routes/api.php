@@ -2,10 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-
 use App\Http\Controllers\UserController;
-
-
 
 
 Route::get('/vehiculos', function () {
@@ -15,30 +12,23 @@ Route::get('/vehiculos', function () {
     ]);
 });
 
-
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 Route::get('/usuarios', [UserController::class, 'index']);
 Route::post('/usuarios', [UserController::class, 'store']);
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
-});
+Route::put('/usuarios/{id}', [UserController::class, 'update']);
+Route::delete('/usuarios/{id}', [UserController::class, 'destroy']);
 
 
-/* Route::post('/debug-login', function (Request $request) {
-    $user = \App\Models\User::where('email', $request->email)->first();
+Route::put('/me', [UserController::class, 'update']);
+Route::put('/me/password', [UserController::class, 'changePassword']);
+Route::delete('/me', [UserController::class, 'destroy']);
 
-    if (!$user) {
-        return response()->json(['ok' => false, 'reason' => 'Usuario no encontrado']);
-    }
 
-    if (!Hash::check($request->password, $user->password)) {
-        return response()->json(['ok' => false, 'reason' => 'Contraseña incorrecta']);
-    }
 
-    return response()->json(['ok' => true, 'message' => 'Login correcto']);
-}); */
+
+
+
+
 
 

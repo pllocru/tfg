@@ -19,9 +19,18 @@ const login = async () => {
             password: password.value
         })
 
+        // Guardamos el token y el rol
         localStorage.setItem('token', res.data.token)
+        localStorage.setItem('role', res.data.role)  // Guardamos el rol
+        localStorage.setItem('userName', res.data.userName); // Guardamos el nombre del usuario
         api.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`
-        router.push('/')
+
+        // Redirigimos según el rol
+        if (res.data.role === 'Administrador') {
+            router.push('/usuarios') // Ruta protegida para Administradores
+        } else {
+            router.push('/') // Ruta principal para otros roles
+        }
     } catch (err) {
         if (err.response?.status === 422) {
             error.value = 'Por favor, completa todos los campos correctamente.'
@@ -34,6 +43,7 @@ const login = async () => {
         loading.value = false // ✅ SIEMPRE se ejecuta, pase lo que pase
     }
 }
+
 </script>
 
 <template>

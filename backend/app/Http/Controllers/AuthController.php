@@ -11,25 +11,28 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
+        // Validación de las credenciales
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        // Intentar autenticar al usuario
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            // Si la autenticación es exitosa, generamos un token
+            $user = Auth::user();
+            $token = $user->createToken('YourAppName')->plainTextToken;
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Credenciales incorrectas'], 401);
+            return response()->json([
+                'token' => $token,
+                'role' => $user->role,// Asegúrate de que el rol esté incluido
+                'userName' => $user->name  // Asegúrate de devolver el userName
+            ]);
         }
 
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        return response()->json([
-            'token' => $token,
-            'user' => $user
-        ]);
+        // Si las credenciales son incorrectas, retornamos error 401
+        return response()->json(['message' => 'Unauthorized'], 401);
     }
-
 
 
     public function logout(Request $request)
